@@ -53,16 +53,35 @@ The user can view their entries on the site. More complex viewing and filtering 
 - The user can see a weekly calendar of the past 7 days that displays the entries for each of the past 7 days in a list
 - The user can select a specific date to see entries from
 
+### Editing and deleting entries
+On the site, the user can select a given entry and edit the text, which will then be updated in the DB. The user can also delete entries on the site. For MVP, the user can only create entries from the Telegram bot, but only edit or delete them on the site. 
+
+## Technical details
+### Tech stack
+Frontend
+- React
+- Vite
+- TailwindCSS
+
+Backend
+- Express
+- BetterAuth for handling user authentication and sessions
+- Drizzle with Postgres
 
 ## Data models
 ### User
 - `id`: UUID, primary key
 - `name`: string
 - `email`: email
+- `password_hash`: hashed password
 - `telegram_id`: string, unique Telegram user ID
 - `telegram_username`: string
 - `telegram_auth_token`: null, temporary token for linking, cleared after use
+- `created_at`: datetime created
+
 
 ### Entry
+- `id`: UUID, primary key
+- `user_id`: UUID to User instance
 - `content`: text field
 - `timestamp`: datetime created
