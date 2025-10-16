@@ -1,5 +1,6 @@
 import express from 'express';
 import cors from 'cors';
+import { toNodeHandler } from 'better-auth/node';
 import { auth } from './lib/auth';
 import botRoutes from './routes/bot';
 import entriesRoutes from './routes/entries';
@@ -9,11 +10,14 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+  credentials: true,
+}));
 app.use(express.json());
 
 // BetterAuth routes - handles /api/auth/*
-app.all('/api/auth/*', (req, res) => auth.handler(req, res));
+app.use('/api/auth', toNodeHandler(auth));
 
 // API routes
 app.use('/api/bot', botRoutes);

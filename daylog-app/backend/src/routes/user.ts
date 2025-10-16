@@ -1,23 +1,22 @@
 import { Router } from 'express';
 import { db } from '../db';
-import { users } from '../db/schema';
+import { user } from '../db/schema';
 import { eq } from 'drizzle-orm';
 import { randomBytes } from 'crypto';
+import { requireAuth, type AuthRequest } from '../middleware/auth';
 
 const router = Router();
+
+// Apply auth middleware to all routes
+router.use(requireAuth);
 
 /**
  * POST /api/user/generate-telegram-token
  * Generates a temporary token for linking Telegram account
  */
-router.post('/generate-telegram-token', async (req, res) => {
+router.post('/generate-telegram-token', async (req: AuthRequest, res) => {
   try {
-    // TODO: Get user ID from session once BetterAuth middleware is set up
-    const userId = req.body.userId as string;
-
-    if (!userId) {
-      return res.status(401).json({ error: 'Unauthorized' });
-    }
+    const userId = req.userId!;
 
     // Generate a random token
     const token = randomBytes(32).toString('hex');
@@ -25,12 +24,12 @@ router.post('/generate-telegram-token', async (req, res) => {
 
     // Update user with new token
     await db
-      .update(users)
+      .update(user)
       .set({
         telegramAuthToken: token,
         telegramTokenExpiresAt: expiresAt,
       })
-      .where(eq(users.id, userId));
+      .where(eq(user.id, userId));
 
     res.json({ token, expiresAt });
   } catch (error) {
@@ -43,34 +42,29 @@ router.post('/generate-telegram-token', async (req, res) => {
  * GET /api/user/me
  * Get current user info
  */
-router.get('/me', async (req, res) => {
+router.get('/me', async (req: AuthRequest, res) => {
   try {
-    // TODO: Get user ID from session once BetterAuth middleware is set up
-    const userId = req.query.userId as string;
+    const userId = req.userId!;
 
-    if (!userId) {
-      return res.status(401).json({ error: 'Unauthorized' });
-    }
-
-    const [user] = await db
+    const [userData] = await db
       .select({
-        id: users.id,
-        name: users.name,
-        email: users.email,
-        telegramId: users.telegramId,
-        telegramUsername: users.telegramUsername,
-        timezone: users.timezone,
-        createdAt: users.createdAt,
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        telegramId: user.telegramId,
+        telegramUsername: user.telegramUsername,
+        timezone: user.timezone,
+        createdAt: user.createdAt,
       })
-      .from(users)
-      .where(eq(users.id, userId))
+      .from(user)
+      .where(eq(user.id, userId))
       .limit(1);
 
-    if (!user) {
+    if (!userData) {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    res.json({ user });
+    res.json({ user: userData });
   } catch (error) {
     console.error('Error fetching user:', error);
     res.status(500).json({ error: 'Internal server error' });

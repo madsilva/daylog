@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { db } from '../db';
-import { users, entries } from '../db/schema';
+import { user, entries } from '../db/schema';
 import { eq } from 'drizzle-orm';
 import { authenticateBotRequests } from '../middleware/botAuth';
 
@@ -22,33 +22,33 @@ router.post('/link-telegram', async (req, res) => {
     }
 
     // Find user with matching auth token that hasn't expired
-    const [user] = await db
+    const [foundUser] = await db
       .select()
-      .from(users)
-      .where(eq(users.telegramAuthToken, token))
+      .from(user)
+      .where(eq(user.telegramAuthToken, token))
       .limit(1);
 
-    if (!user) {
+    if (!foundUser) {
       return res.status(404).json({ error: 'Invalid or expired token' });
     }
 
     // Check if token has expired
-    if (user.telegramTokenExpiresAt && user.telegramTokenExpiresAt < new Date()) {
+    if (foundUser.telegramTokenExpiresAt && foundUser.telegramTokenExpiresAt < new Date()) {
       return res.status(400).json({ error: 'Token has expired' });
     }
 
     // Update user with Telegram info and clear token
     await db
-      .update(users)
+      .update(user)
       .set({
         telegramId,
         telegramUsername: telegramUsername || null,
         telegramAuthToken: null,
         telegramTokenExpiresAt: null,
       })
-      .where(eq(users.id, user.id));
+      .where(eq(user.id, foundUser.id));
 
-    res.json({ success: true, userId: user.id });
+    res.json({ success: true, userId: foundUser.id });
   } catch (error) {
     console.error('Error linking Telegram account:', error);
     res.status(500).json({ error: 'Internal server error' });
@@ -63,17 +63,17 @@ router.get('/user/:telegramId', async (req, res) => {
   try {
     const { telegramId } = req.params;
 
-    const [user] = await db
-      .select({ id: users.id })
-      .from(users)
-      .where(eq(users.telegramId, telegramId))
+    const [foundUser] = await db
+      .select({ id: user.id })
+      .from(user)
+      .where(eq(user.telegramId, telegramId))
       .limit(1);
 
-    if (!user) {
+    if (!foundUser) {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    res.json({ userId: user.id });
+    res.json({ userId: foundUser.id });
   } catch (error) {
     console.error('Error fetching user:', error);
     res.status(500).json({ error: 'Internal server error' });

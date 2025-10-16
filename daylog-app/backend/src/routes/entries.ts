@@ -2,23 +2,21 @@ import { Router } from 'express';
 import { db } from '../db';
 import { entries } from '../db/schema';
 import { eq, and, gte, lte, desc } from 'drizzle-orm';
+import { requireAuth, type AuthRequest } from '../middleware/auth';
 
 const router = Router();
+
+// Apply auth middleware to all routes
+router.use(requireAuth);
 
 /**
  * GET /api/entries
  * Get entries for the authenticated user
  * Query params: startDate, endDate (optional)
  */
-router.get('/', async (req, res) => {
+router.get('/', async (req: AuthRequest, res) => {
   try {
-    // TODO: Get user ID from session once BetterAuth middleware is set up
-    const userId = req.query.userId as string;
-
-    if (!userId) {
-      return res.status(401).json({ error: 'Unauthorized' });
-    }
-
+    const userId = req.userId!;
     const { startDate, endDate } = req.query;
 
     let query = db
@@ -55,16 +53,11 @@ router.get('/', async (req, res) => {
  * PATCH /api/entries/:id
  * Update an entry
  */
-router.patch('/:id', async (req, res) => {
+router.patch('/:id', async (req: AuthRequest, res) => {
   try {
-    // TODO: Get user ID from session once BetterAuth middleware is set up
-    const userId = req.body.userId as string;
+    const userId = req.userId!;
     const { id } = req.params;
     const { content } = req.body;
-
-    if (!userId) {
-      return res.status(401).json({ error: 'Unauthorized' });
-    }
 
     if (!content) {
       return res.status(400).json({ error: 'Content is required' });
@@ -99,15 +92,10 @@ router.patch('/:id', async (req, res) => {
  * DELETE /api/entries/:id
  * Delete an entry
  */
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', async (req: AuthRequest, res) => {
   try {
-    // TODO: Get user ID from session once BetterAuth middleware is set up
-    const userId = req.query.userId as string;
+    const userId = req.userId!;
     const { id } = req.params;
-
-    if (!userId) {
-      return res.status(401).json({ error: 'Unauthorized' });
-    }
 
     // Verify the entry belongs to the user
     const [entry] = await db
