@@ -1,3 +1,70 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --gradient-pink: linear-gradient(135deg, #ffc2e2 0%, #ff9ec7 50%, #f78acd 100%);
+    --gradient-mauve: linear-gradient(135deg, #f5d0fe 0%, #e9d5ff 50%, #ddd6fe 100%);
+    --gradient-sunset: linear-gradient(135deg, #ffc2e2 0%, #f5d0fe 50%, #fff 100%);
+    --gradient-dreamy: linear-gradient(180deg, #fff 0%, #fef3f8 50%, #fce7f3 100%);
+  }
+}
+
+@layer components {
+  .gradient-bg {
+    background: linear-gradient(135deg, #ffc2e2 0%, #f5d0fe 50%, #fff 100%);
+  }
+
+  .gradient-text {
+    background: linear-gradient(135deg, #ff9ec7 0%, #c084fc 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .card-gradient {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(254, 243, 248, 0.95) 100%);
+    backdrop-filter: blur(10px);
+  }
+
+  .input-focus {
+    @apply focus:ring-2 focus:ring-pink-400 focus:border-pink-400 transition-all;
+  }
+
+  .btn-primary {
+    @apply bg-gradient-to-r from-pink-400 to-purple-400 hover:from-pink-500 hover:to-purple-500
+           text-white font-medium py-2 px-4 rounded-lg shadow-md hover:shadow-lg
+           transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-secondary {
+    @apply bg-white/80 hover:bg-white text-pink-600 font-medium py-2 px-4 rounded-lg
+           border border-pink-200 shadow-sm hover:shadow-md transition-all duration-200;
+  }
+
+  @keyframes blob {
+    0% {
+      transform: translate(0px, 0px) scale(1);
+    }
+    33% {
+      transform: translate(30px, -50px) scale(1.1);
+    }
+    66% {
+      transform: translate(-20px, 20px) scale(0.9);
+    }
+    100% {
+      transform: translate(0px, 0px) scale(1);
+    }
+  }
+
+  .animate-blob {
+    animation: blob 7s infinite;
+  }
+
+  .animation-delay-2000 {
+    animation-delay: 2s;
+  }
+
+  .animation-delay-4000 {
+    animation-delay: 4s;
+  }
+}

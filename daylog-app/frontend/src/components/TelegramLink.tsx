@@ -1,6 +1,9 @@
 import { useState } from 'react';
 import { generateTelegramToken } from '../lib/api';
 import type { User } from '../types';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Heart, MessageCircle, CheckCircle2 } from 'lucide-react';
 
 interface TelegramLinkProps {
   user: User;
@@ -30,11 +33,19 @@ export default function TelegramLink({ user, onLinked }: TelegramLinkProps) {
 
   if (user.telegramId) {
     return (
-      <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-        <p className="text-green-700">
-          Telegram linked as <span className="font-medium">@{user.telegramUsername || user.telegramId}</span>
-        </p>
-      </div>
+      <Card className="border-pink-200 bg-gradient-to-br from-pink-50 to-purple-50">
+        <CardContent className="pt-6">
+          <div className="flex items-center gap-3">
+            <CheckCircle2 className="w-6 h-6 text-pink-400 flex-shrink-0" />
+            <div>
+              <p className="text-pink-900 font-medium">Telegram Connected</p>
+              <p className="text-sm text-pink-600">
+                @{user.telegramUsername || user.telegramId}
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     );
   }
 
@@ -42,40 +53,63 @@ export default function TelegramLink({ user, onLinked }: TelegramLinkProps) {
     const telegramLink = `https://t.me/${TELEGRAM_BOT_USERNAME}?start=${token}`;
 
     return (
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 space-y-3">
-        <p className="text-blue-900 font-medium">Click the link below to connect Telegram:</p>
-        <a
-          href={telegramLink}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="block w-full text-center py-2 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-        >
-          Open Telegram Bot
-        </a>
-        <p className="text-sm text-blue-700">This link will expire in 10 minutes</p>
-        <button
-          onClick={() => setToken(null)}
-          className="text-sm text-blue-600 hover:text-blue-700"
-        >
-          Cancel
-        </button>
-      </div>
+      <Card className="border-pink-200">
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <MessageCircle className="w-5 h-5 text-pink-400" />
+            <CardTitle className="text-base">Connect Telegram</CardTitle>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <p className="text-sm text-pink-700">Click the link below to connect your Telegram account:</p>
+          <a
+            href={telegramLink}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <Button className="w-full">
+              Open Telegram Bot
+            </Button>
+          </a>
+          <p className="text-xs text-pink-500">This link will expire in 10 minutes</p>
+          <Button
+            onClick={() => setToken(null)}
+            variant="ghost"
+            size="sm"
+            className="w-full"
+          >
+            Cancel
+          </Button>
+        </CardContent>
+      </Card>
     );
   }
 
   return (
-    <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-      {error && (
-        <div className="mb-3 text-red-700 text-sm">{error}</div>
-      )}
-      <p className="text-gray-700 mb-3">Connect your Telegram account to create entries via chat</p>
-      <button
-        onClick={handleGenerateToken}
-        disabled={loading}
-        className="w-full py-2 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
-      >
-        {loading ? 'Generating...' : 'Link Telegram'}
-      </button>
-    </div>
+    <Card className="border-pink-200">
+      <CardHeader>
+        <div className="flex items-center gap-2">
+          <Heart className="w-5 h-5 text-pink-400 fill-pink-400" />
+          <CardTitle className="text-base">Link Telegram</CardTitle>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        {error && (
+          <div className="bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded-lg text-sm">
+            {error}
+          </div>
+        )}
+        <p className="text-sm text-pink-700">
+          Connect your Telegram account to create entries via chat
+        </p>
+        <Button
+          onClick={handleGenerateToken}
+          disabled={loading}
+          className="w-full"
+        >
+          {loading ? 'Generating...' : 'Link Telegram'}
+        </Button>
+      </CardContent>
+    </Card>
   );
 }
