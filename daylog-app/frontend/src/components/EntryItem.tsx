@@ -2,6 +2,9 @@ import { useState } from 'react';
 import { format } from 'date-fns';
 import type { Entry } from '../types';
 import { updateEntry, deleteEntry } from '../lib/api';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Edit2, Trash2, Save, X } from 'lucide-react';
 
 interface EntryItemProps {
   entry: Entry;
@@ -55,57 +58,68 @@ export default function EntryItem({ entry, onUpdate, onDelete }: EntryItemProps)
   const formattedTime = format(timestamp, 'h:mm a');
 
   return (
-    <div className="bg-white border border-gray-200 rounded-lg p-4">
-      <div className="flex justify-between items-start mb-2">
-        <span className="text-sm text-gray-500">{formattedTime}</span>
-        {!isEditing && (
-          <div className="flex gap-2">
-            <button
-              onClick={() => setIsEditing(true)}
-              className="text-sm text-blue-600 hover:text-blue-700"
-              disabled={loading}
-            >
-              Edit
-            </button>
-            <button
-              onClick={handleDelete}
-              className="text-sm text-red-600 hover:text-red-700"
-              disabled={loading}
-            >
-              Delete
-            </button>
-          </div>
-        )}
-      </div>
-
-      {isEditing ? (
-        <div className="space-y-2">
-          <textarea
-            value={editedContent}
-            onChange={(e) => setEditedContent(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-            rows={3}
-          />
-          <div className="flex gap-2">
-            <button
-              onClick={handleSave}
-              disabled={loading}
-              className="px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 text-sm"
-            >
-              {loading ? 'Saving...' : 'Save'}
-            </button>
-            <button
-              onClick={handleCancel}
-              disabled={loading}
-              className="px-3 py-1 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 disabled:opacity-50 text-sm"
-            >
-              Cancel
-            </button>
-          </div>
+    <Card className="border-pink-100 bg-gradient-to-br from-white to-pink-50/30">
+      <CardContent className="pt-4">
+        <div className="flex justify-between items-start mb-3">
+          <span className="text-sm font-medium text-pink-500">{formattedTime}</span>
+          {!isEditing && (
+            <div className="flex gap-2">
+              <Button
+                onClick={() => setIsEditing(true)}
+                variant="ghost"
+                size="sm"
+                disabled={loading}
+                className="h-8 px-2 text-pink-600 hover:text-pink-700 hover:bg-pink-50"
+              >
+                <Edit2 className="w-4 h-4" />
+              </Button>
+              <Button
+                onClick={handleDelete}
+                variant="ghost"
+                size="sm"
+                disabled={loading}
+                className="h-8 px-2 text-pink-600 hover:text-red-600 hover:bg-red-50"
+              >
+                <Trash2 className="w-4 h-4" />
+              </Button>
+            </div>
+          )}
         </div>
-      ) : (
-        <p className="text-gray-900 whitespace-pre-wrap">{entry.content}</p>
-      )}
-    </div>
+
+        {isEditing ? (
+          <div className="space-y-3">
+            <textarea
+              value={editedContent}
+              onChange={(e) => setEditedContent(e.target.value)}
+              className="w-full px-3 py-2 border border-pink-200 rounded-lg bg-white/80 focus:outline-none focus:ring-2 focus:ring-pink-400 focus:border-pink-400 text-pink-900 placeholder:text-pink-300"
+              rows={3}
+            />
+            <div className="flex gap-2">
+              <Button
+                onClick={handleSave}
+                disabled={loading}
+                size="sm"
+                className="gap-2"
+              >
+                <Save className="w-4 h-4" />
+                {loading ? 'Saving...' : 'Save'}
+              </Button>
+              <Button
+                onClick={handleCancel}
+                disabled={loading}
+                variant="secondary"
+                size="sm"
+                className="gap-2"
+              >
+                <X className="w-4 h-4" />
+                Cancel
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <p className="text-pink-900 whitespace-pre-wrap leading-relaxed">{entry.content}</p>
+        )}
+      </CardContent>
+    </Card>
   );
 }

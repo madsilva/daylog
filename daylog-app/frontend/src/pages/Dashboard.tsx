@@ -6,6 +6,8 @@ import { fetchEntries, fetchUser } from '../lib/api';
 import type { Entry, User } from '../types';
 import TelegramLink from '../components/TelegramLink';
 import EntryItem from '../components/EntryItem';
+import { Heart, LogOut } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 export default function Dashboard() {
   const { data: session, isPending } = useSession();
@@ -70,10 +72,10 @@ export default function Dashboard() {
     return acc;
   }, {} as Record<string, Entry[]>);
 
-  if (isPending || loading) {
+  if (isPending ) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-gray-600">Loading...</div>
+      <div className="min-h-screen flex items-center justify-center gradient-bg">
+        <div className="text-pink-600">Loading...</div>
       </div>
     );
   }
@@ -83,35 +85,46 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <nav className="bg-white shadow">
+    <div className="min-h-screen gradient-bg">
+      {/* Animated background blobs */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-pink-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob" />
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-purple-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000" />
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-pink-200 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000" />
+      </div>
+
+      <nav className="relative z-10 bg-white/80 backdrop-blur-md shadow-md border-b border-pink-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
-            <div className="flex items-center">
-              <h1 className="text-2xl font-bold">Daylog</h1>
+            <div className="flex items-center gap-2">
+              <Heart className="w-6 h-6 text-pink-400 fill-pink-400" />
+              <h1 className="text-2xl font-bold gradient-text">Daylog</h1>
             </div>
             <div className="flex items-center gap-4">
-              <span className="text-gray-700">Hello, {user.name}</span>
-              <button
+              <span className="text-pink-700">Hello, {user.name}</span>
+              <Button
                 onClick={handleSignOut}
-                className="px-4 py-2 text-sm text-gray-700 hover:text-gray-900"
+                variant="ghost"
+                size="sm"
+                className="gap-2"
               >
+                <LogOut className="w-4 h-4" />
                 Sign out
-              </button>
+              </Button>
             </div>
           </div>
         </div>
       </nav>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Sidebar */}
           <div className="space-y-6">
             <TelegramLink user={user} onLinked={loadData} />
 
             {/* Week Calendar */}
-            <div className="bg-white rounded-lg shadow p-4">
-              <h2 className="font-semibold mb-3">Past 7 Days</h2>
+            <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg border border-pink-100 p-4">
+              <h2 className="font-semibold mb-3 text-pink-700">Past 7 Days</h2>
               <div className="space-y-2">
                 {last7Days.map(date => {
                   const dateStr = format(date, 'yyyy-MM-dd');
@@ -122,15 +135,17 @@ export default function Dashboard() {
                     <button
                       key={dateStr}
                       onClick={() => setSelectedDate(date)}
-                      className={`w-full text-left px-3 py-2 rounded-md ${
+                      className={`w-full text-left px-3 py-2 rounded-md transition-all ${
                         isSelected
-                          ? 'bg-blue-100 text-blue-900'
-                          : 'hover:bg-gray-100'
+                          ? 'bg-gradient-to-r from-pink-100 to-purple-100 text-pink-900 shadow-sm'
+                          : 'hover:bg-pink-50'
                       }`}
                     >
                       <div className="flex justify-between">
-                        <span>{format(date, 'MMM d, yyyy')}</span>
-                        <span className="text-gray-500">{count} entries</span>
+                        <span className="font-medium">{format(date, 'MMM d, yyyy')}</span>
+                        <span className={isSelected ? 'text-pink-700' : 'text-pink-400'}>
+                          {count} {count === 1 ? 'entry' : 'entries'}
+                        </span>
                       </div>
                     </button>
                   );
@@ -141,15 +156,18 @@ export default function Dashboard() {
 
           {/* Entries List */}
           <div className="lg:col-span-2">
-            <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-xl font-bold mb-4">
+            <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg border border-pink-100 p-6">
+              <h2 className="text-xl font-bold mb-4 gradient-text">
                 {format(selectedDate, 'MMMM d, yyyy')}
               </h2>
 
               {entries.length === 0 ? (
-                <p className="text-gray-500 text-center py-8">
-                  No entries for this day
-                </p>
+                <div className="text-center py-12">
+                  <Heart className="w-16 h-16 mx-auto mb-4 text-pink-300" />
+                  <p className="text-pink-400">
+                    No entries for this day
+                  </p>
+                </div>
               ) : (
                 <div className="space-y-4">
                   {entries.map(entry => (
