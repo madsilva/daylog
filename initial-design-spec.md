@@ -5,7 +5,7 @@ Daylog is an app that lets you record your daily activities in an easy and natur
 
 ## Parts of the app
 ### Chatbot
-- The chatbot that collects entries will initially be implemented as a Telegram bot
+- The chatbot that collects entries will initially be implemented as a Telegram bot. Users will make an account on the site, and then be prompted to connect their account to the Telegram bot. 
 
 ### Website
 - The app will have a website where users will sign up, manage their account, and most importantly, view their log of entries.
