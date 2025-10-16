@@ -1,0 +1,2 @@
+## Why texting?
+Personally, I find the texting interface more appealing - instead of a notes app note where I'm confronted by whatever I last wrote right there when I open the note, texts get pushed upwards by new ones, going out of sight, reducing the distraction. 
