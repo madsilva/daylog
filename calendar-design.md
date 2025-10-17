@@ -1,0 +1,5 @@
+A vision for one version of the calendar view
+"Browse mode"
+at the top of the page, a collapsible calendar date picker (using a modified shadcn calendar component) which allows the user to pick any date, with month and year dropdowns
+The main part of the page is formatted into 3 columns. The middle column is the current day being viewed, and it contains all the entries for that day. To either side, columns for the day before and the day after the current day are displayed, slightly grayed out, and there are arrows to navigate to the next day or the previous day. the navigation between day cards should be animated. the goal is to give the user an experience like flipping through a book, but with the addition of the calendar selector, which will instantly take them to any given day. 
+This browse mode viewer should be embedded in the dashboard, at the top of the page. can 

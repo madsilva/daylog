@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { format, subDays, startOfDay, endOfDay } from 'date-fns';
+import { format, subDays, addDays, startOfDay, endOfDay } from 'date-fns';
 import { useSession, signOut } from '../lib/auth';
 import { fetchEntries, fetchUser } from '../lib/api';
 import type { Entry, User } from '../types';
 import TelegramLink from '../components/TelegramLink';
 import EntryItem from '../components/EntryItem';
+import BrowseMode from '../components/BrowseMode';
 import { Heart, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -14,6 +15,7 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(null);
   const [entries, setEntries] = useState<Entry[]>([]);
+  const [allEntries, setAllEntries] = useState<Record<string, Entry[]>>({});
   const [loading, setLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
 
@@ -32,15 +34,34 @@ export default function Dashboard() {
   const loadData = async () => {
     setLoading(true);
     try {
-      const [userData, entriesData] = await Promise.all([
+      const prevDate = subDays(selectedDate, 1);
+      const nextDate = addDays(selectedDate, 1);
+
+      const [userData, currentEntries, prevEntries, nextEntries] = await Promise.all([
         fetchUser(),
         fetchEntries(
           startOfDay(selectedDate).toISOString(),
           endOfDay(selectedDate).toISOString()
         ),
+        fetchEntries(
+          startOfDay(prevDate).toISOString(),
+          endOfDay(prevDate).toISOString()
+        ),
+        fetchEntries(
+          startOfDay(nextDate).toISOString(),
+          endOfDay(nextDate).toISOString()
+        ),
       ]);
+
       setUser(userData);
-      setEntries(entriesData);
+      setEntries(currentEntries);
+
+      // Store all entries by date
+      setAllEntries({
+        [format(prevDate, 'yyyy-MM-dd')]: prevEntries,
+        [format(selectedDate, 'yyyy-MM-dd')]: currentEntries,
+        [format(nextDate, 'yyyy-MM-dd')]: nextEntries,
+      });
     } catch (err) {
       console.error('Failed to load data:', err);
     } finally {
@@ -117,6 +138,18 @@ export default function Dashboard() {
       </nav>
 
       <main className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Browse Mode */}
+        <div className="mb-8">
+          <BrowseMode
+            entries={entries}
+            selectedDate={selectedDate}
+            onDateChange={setSelectedDate}
+            onEntryUpdate={handleEntryUpdate}
+            onEntryDelete={handleEntryDelete}
+            allEntries={allEntries}
+          />
+        </div>
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Sidebar */}
           <div className="space-y-6">
