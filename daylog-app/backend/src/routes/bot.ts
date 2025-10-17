@@ -86,9 +86,9 @@ router.get('/user/:telegramId', async (req, res) => {
  */
 router.post('/entries', async (req, res) => {
   try {
-    const { userId, content } = req.body;
+    const { userId, content, timestamp } = req.body;
 
-    if (!userId || !content) {
+    if (!userId || !content || !timestamp) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
@@ -97,6 +97,7 @@ router.post('/entries', async (req, res) => {
       .values({
         userId,
         content,
+        timestamp: new Date(timestamp), // Use the timestamp from Telegram message
       })
       .returning();
 
