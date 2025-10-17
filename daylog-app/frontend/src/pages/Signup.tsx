@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { signUp } from '@/lib/auth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,6 +13,7 @@ export default function Signup() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -20,12 +21,23 @@ export default function Signup() {
     setLoading(true);
 
     try {
-      await signUp.email({
-        email,
-        password,
-        name,
-        callbackURL: '/dashboard'
-      });
+      const result = await signUp.email({ email, password, name });
+
+      if (result.error) {
+        const errorMessage = result.error.message || 'Failed to create account';
+        // Provide more specific error for duplicate email
+        if (errorMessage.includes('duplicate') || errorMessage.includes('already exists')) {
+          setError('An account with this email already exists');
+        } else {
+          setError(errorMessage);
+        }
+        setLoading(false);
+      } else {
+        // Wait a moment for session to be established, then navigate
+        setTimeout(() => {
+          navigate('/dashboard');
+        }, 100);
+      }
     } catch (err: any) {
       setError(err.message || 'Failed to create account');
       setLoading(false);
