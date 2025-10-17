@@ -63,7 +63,8 @@ export const entries = pgTable('entries', {
     .notNull()
     .references(() => user.id, { onDelete: 'cascade' }),
   content: text('content').notNull(),
-  timestamp: timestamp('timestamp').defaultNow().notNull(),
+  timestamp: timestamp('timestamp').notNull(), // When user sent the message
+  createdOnDBAt: timestamp('created_on_db_at').defaultNow().notNull(), // When entry was created in DB
 });
 
 export type User = typeof user.$inferSelect;

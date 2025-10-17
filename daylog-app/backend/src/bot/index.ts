@@ -88,6 +88,7 @@ bot.on('message', async (msg) => {
   const chatId = msg.chat.id;
   const telegramId = msg.from?.id.toString();
   const content = msg.text;
+  const messageDate = msg.date; // Unix timestamp from Telegram
 
   if (!telegramId || !content) {
     return;
@@ -115,7 +116,7 @@ bot.on('message', async (msg) => {
 
     const { userId } = await userResponse.json();
 
-    // Create entry
+    // Create entry with Telegram message timestamp
     const entryResponse = await fetch(`${API_URL}/api/bot/entries`, {
       method: 'POST',
       headers: {
@@ -125,6 +126,7 @@ bot.on('message', async (msg) => {
       body: JSON.stringify({
         userId,
         content,
+        timestamp: new Date(messageDate * 1000).toISOString(), // Convert Unix timestamp to ISO string
       }),
     });
 
