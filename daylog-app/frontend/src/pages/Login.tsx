@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { signIn } from '@/lib/auth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,6 +12,7 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -19,13 +20,20 @@ export default function Login() {
     setLoading(true);
 
     try {
-      await signIn.email({
-        email,
-        password,
-        callbackURL: '/dashboard'
-      });
-    } catch (err) {
-      setError('Invalid email or password');
+      const result = await signIn.email({ email, password });
+
+      // Check if sign in was successful
+      if (result.error) {
+        setError(result.error.message || 'Invalid email or password');
+        setLoading(false);
+      } else {
+        // Wait a moment for session to be established, then navigate
+        setTimeout(() => {
+          navigate('/dashboard');
+        }, 100);
+      }
+    } catch (err: any) {
+      setError(err.message || 'Invalid email or password');
       setLoading(false);
     }
   };
