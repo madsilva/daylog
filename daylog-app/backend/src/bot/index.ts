@@ -77,6 +77,80 @@ bot.onText(/\/start$/, (msg) => {
 });
 
 /**
+ * Handle /yesterday or /y command with no content
+ */
+bot.onText(/^\/(yesterday|y)$/, (msg) => {
+  const chatId = msg.chat.id;
+  bot.sendMessage(chatId, "Can't create entry for yesterday with no content!");
+});
+
+/**
+ * Handle /yesterday or /y command for creating yesterday's entry
+ */
+bot.onText(/^\/(yesterday|y)\s+(.+)/, async (msg, match) => {
+  const chatId = msg.chat.id;
+  const telegramId = msg.from?.id.toString();
+  const content = match?.[2]?.trim(); // The text after the command
+
+  if (!telegramId || !content) {
+    bot.sendMessage(chatId, "Can't create entry for yesterday with no content!");
+    return;
+  }
+
+  try {
+    // Get user ID from telegram ID
+    const userResponse = await fetch(`${API_URL}/api/bot/user/${telegramId}`, {
+      headers: {
+        'x-bot-api-key': BOT_API_KEY,
+      },
+    });
+
+    if (!userResponse.ok) {
+      if (userResponse.status === 404) {
+        bot.sendMessage(
+          chatId,
+          'Your account is not linked. Please link your account from the website first.'
+        );
+      } else {
+        bot.sendMessage(chatId, 'An error occurred. Please try again later.');
+      }
+      return;
+    }
+
+    const { userId } = await userResponse.json();
+
+    // Create timestamp for yesterday at noon
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    yesterday.setHours(12, 0, 0, 0);
+
+    // Create entry for yesterday
+    const entryResponse = await fetch(`${API_URL}/api/bot/entries`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-bot-api-key': BOT_API_KEY,
+      },
+      body: JSON.stringify({
+        userId,
+        content,
+        timestamp: yesterday.toISOString(),
+      }),
+    });
+
+    if (!entryResponse.ok) {
+      bot.sendMessage(chatId, 'Failed to create entry. Please try again.');
+      return;
+    }
+
+    bot.sendMessage(chatId, '✅ Entry recorded for yesterday!');
+  } catch (error) {
+    console.error('Error creating yesterday entry:', error);
+    bot.sendMessage(chatId, 'An error occurred. Please try again later.');
+  }
+});
+
+/**
  * Handle all other messages as entry creation
  */
 bot.on('message', async (msg) => {
