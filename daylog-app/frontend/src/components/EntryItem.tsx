@@ -59,8 +59,8 @@ export default function EntryItem({ entry, onUpdate, onDelete }: EntryItemProps)
 
   return (
     <Card className="border-pink-100 bg-gradient-to-br from-white to-pink-50/30">
-      <CardContent className="pt-4">
-        <div className="flex justify-between items-start mb-3">
+      <CardContent className="p-2">
+        <div className="flex justify-between items-center">
           <span className="text-sm font-medium text-pink-500">{formattedTime}</span>
           {!isEditing && (
             <div className="flex gap-2">
