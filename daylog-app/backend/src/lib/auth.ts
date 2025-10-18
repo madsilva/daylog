@@ -13,11 +13,14 @@ export const auth = betterAuth({
   baseURL: process.env.BETTER_AUTH_URL || 'http://localhost:3000',
   trustedOrigins: [process.env.FRONTEND_URL || 'http://localhost:5173'],
   advanced: {
-    useSecureCookies: process.env.NODE_ENV === 'production',
-    defaultCookieAttributes: {
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-      partitioned: process.env.NODE_ENV === 'production',
+    cookies: {
+      sessionToken: {
+        attributes: {
+          sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+          secure: process.env.NODE_ENV === 'production',
+          partitioned: process.env.NODE_ENV === 'production',
+        },
+      },
     },
   },
 });
