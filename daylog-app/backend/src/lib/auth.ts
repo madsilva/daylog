@@ -16,9 +16,9 @@ export const auth = betterAuth({
     cookies: {
       sessionToken: {
         attributes: {
-          sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-          secure: process.env.NODE_ENV === 'production',
-          partitioned: process.env.NODE_ENV === 'production',
+          sameSite: 'none',
+          secure: true,
+          partitioned: true,
         },
       },
     },
