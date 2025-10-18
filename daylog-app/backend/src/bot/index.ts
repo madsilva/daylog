@@ -85,18 +85,52 @@ bot.onText(/^\/(yesterday|y)$/, (msg) => {
 });
 
 /**
+ * Handle /Nd commands (e.g., /1d, /2d, up to /7d) with no content
+ */
+bot.onText(/^\/([1-7])d$/, (msg, match) => {
+  const chatId = msg.chat.id;
+  const days = parseInt(match?.[1] || '1');
+  const daysText = days === 1 ? 'yesterday' : `${days} days ago`;
+  bot.sendMessage(chatId, `Can't create entry for ${daysText} with no content!`);
+});
+
+/**
  * Handle /yesterday or /y command for creating yesterday's entry
  */
 bot.onText(/^\/(yesterday|y)\s+(.+)/, async (msg, match) => {
   const chatId = msg.chat.id;
   const telegramId = msg.from?.id.toString();
-  const content = match?.[2]?.trim(); // The text after the command
+  const content = match?.[2]?.trim();
 
   if (!telegramId || !content) {
     bot.sendMessage(chatId, "Can't create entry for yesterday with no content!");
     return;
   }
 
+  await createPastEntry(chatId, telegramId, content, 1);
+});
+
+/**
+ * Handle /Nd commands (e.g., /1d, /2d, up to /7d) for creating past entries
+ */
+bot.onText(/^\/([1-7])d\s+(.+)/, async (msg, match) => {
+  const chatId = msg.chat.id;
+  const telegramId = msg.from?.id.toString();
+  const days = parseInt(match?.[1] || '1');
+  const content = match?.[2]?.trim();
+
+  if (!telegramId || !content) {
+    bot.sendMessage(chatId, `Can't create entry with no content!`);
+    return;
+  }
+
+  await createPastEntry(chatId, telegramId, content, days);
+});
+
+/**
+ * Helper function to create an entry for N days ago
+ */
+async function createPastEntry(chatId: number, telegramId: string, content: string, daysAgo: number) {
   try {
     // Get user ID from telegram ID
     const userResponse = await fetch(`${API_URL}/api/bot/user/${telegramId}`, {
@@ -119,12 +153,12 @@ bot.onText(/^\/(yesterday|y)\s+(.+)/, async (msg, match) => {
 
     const { userId } = await userResponse.json();
 
-    // Create timestamp for yesterday at noon
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
-    yesterday.setHours(12, 0, 0, 0);
+    // Create timestamp for N days ago at noon
+    const pastDate = new Date();
+    pastDate.setDate(pastDate.getDate() - daysAgo);
+    pastDate.setHours(12, 0, 0, 0);
 
-    // Create entry for yesterday
+    // Create entry for past date
     const entryResponse = await fetch(`${API_URL}/api/bot/entries`, {
       method: 'POST',
       headers: {
@@ -134,7 +168,7 @@ bot.onText(/^\/(yesterday|y)\s+(.+)/, async (msg, match) => {
       body: JSON.stringify({
         userId,
         content,
-        timestamp: yesterday.toISOString(),
+        timestamp: pastDate.toISOString(),
       }),
     });
 
@@ -143,12 +177,19 @@ bot.onText(/^\/(yesterday|y)\s+(.+)/, async (msg, match) => {
       return;
     }
 
-    bot.sendMessage(chatId, '✅ Entry recorded for yesterday!');
+    // Format the date for the response
+    const formattedDate = pastDate.toLocaleDateString('en-US', {
+      month: 'long',
+      day: 'numeric',
+      year: 'numeric',
+    });
+
+    bot.sendMessage(chatId, `✅ Created entry for ${formattedDate}`);
   } catch (error) {
-    console.error('Error creating yesterday entry:', error);
+    console.error('Error creating past entry:', error);
     bot.sendMessage(chatId, 'An error occurred. Please try again later.');
   }
-});
+}
 
 /**
  * Handle all other messages as entry creation
