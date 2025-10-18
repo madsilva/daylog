@@ -2,11 +2,14 @@ FROM oven/bun:1
 
 WORKDIR /app
 
+# Set production environment
+ENV NODE_ENV=production
+
 # Copy package files
 COPY package.json bun.lock ./
 
 # Install dependencies
-RUN bun install
+RUN bun install --production
 
 # Copy source code
 COPY . .
