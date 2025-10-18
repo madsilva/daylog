@@ -2,11 +2,13 @@ import { betterAuth } from 'better-auth';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 import { db } from '../db';
 
+const isProd = process.env.NODE_ENV === 'production';
+
 const cookieAttributes = {
-  sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-  secure: process.env.NODE_ENV === 'production',
-  partitioned: process.env.NODE_ENV === 'production',
-} as const;
+  sameSite: isProd ? ('none' as const) : ('lax' as const),
+  secure: isProd,
+  partitioned: isProd,
+};
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
